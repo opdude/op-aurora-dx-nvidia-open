@@ -30,6 +30,10 @@ jobs:
           - recipe.yml
     steps:
       # the build is fully handled by the reusable github action
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Place the EVDI signing key
+        run: echo "${{ secrets.EVDI_SIGNING_KEY_PEM }}" > files/keys/evdi-signing-key.pem
       - name: Build Custom Image
         uses: blue-build/github-action@v1.8
         with:
@@ -37,6 +41,37 @@ jobs:
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
-
+          skip_checkout: true # we want to place the signing key so we will clone the repo ourselves
+          use_cache: true # use the cache to speed up builds
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
+
+      # Create stable tag when pushed to main branch
+      - name: Create stable tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Get the built image name from the recipe
+          IMAGE_NAME=$(grep -E "^name:" recipes/${{ matrix.recipe }} | cut -d' ' -f2 | tr -d '"')
+          IMAGE_REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          
+          # Blue-build uses date-based tags for builds
+          DATE_TAG=$(date +%Y%m%d)
+          
+          # Create the source and target image references
+          SOURCE_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:${DATE_TAG}"
+          TARGET_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:stable"
+          
+          # Log in to the container registry
+          echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          # Pull the source image, tag it as stable, and push
+          echo "📦 Pulling ${SOURCE_IMAGE}"
+          docker pull "${SOURCE_IMAGE}"
+          
+          echo "🏷️  Tagging as stable"
+          docker tag "${SOURCE_IMAGE}" "${TARGET_IMAGE}"
+          
+          echo "🚀 Pushing stable tag"
+          docker push "${TARGET_IMAGE}"
+          
+          echo "✅ Successfully tagged ${SOURCE_IMAGE} as ${TARGET_IMAGE}"
