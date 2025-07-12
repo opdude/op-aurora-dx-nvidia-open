@@ -47,6 +47,12 @@ jobs:
           maximize_build_space: true
 
       # Create stable tag when pushed to main branch
+      - name: Install skopeo
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+          
       - name: Create stable tag
         if: github.ref == 'refs/heads/main'
         run: |
@@ -61,17 +67,18 @@ jobs:
           SOURCE_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:${DATE_TAG}"
           TARGET_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:stable"
           
-          # Log in to the container registry
-          echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "📋 Image details:"
+          echo "  Recipe: ${{ matrix.recipe }}"
+          echo "  Image Name: ${IMAGE_NAME}"
+          echo "  Source: ${SOURCE_IMAGE}"
+          echo "  Target: ${TARGET_IMAGE}"
           
-          # Pull the source image, tag it as stable, and push
-          echo "📦 Pulling ${SOURCE_IMAGE}"
-          docker pull "${SOURCE_IMAGE}"
+          # Configure skopeo authentication
+          echo "🔐 Configuring registry authentication"
+          skopeo login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
           
-          echo "🏷️  Tagging as stable"
-          docker tag "${SOURCE_IMAGE}" "${TARGET_IMAGE}"
+          # Use skopeo to copy the image with all signatures and metadata
+          echo "📦 Copying ${SOURCE_IMAGE} to ${TARGET_IMAGE} with signatures"
+          skopeo copy --all "docker://${SOURCE_IMAGE}" "docker://${TARGET_IMAGE}"
           
-          echo "🚀 Pushing stable tag"
-          docker push "${TARGET_IMAGE}"
-          
-          echo "✅ Successfully tagged ${SOURCE_IMAGE} as ${TARGET_IMAGE}"
+          echo "✅ Successfully copied ${SOURCE_IMAGE} to ${TARGET_IMAGE} with all signatures"
