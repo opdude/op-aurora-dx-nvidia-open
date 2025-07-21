@@ -33,9 +33,64 @@ jobs:
       # the build is fully handled by the reusable github action
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Install skopeo for image checking
+        if: github.event_name == 'schedule'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+      
+      - name: Check for new Aurora DX image
+        id: check_image
+        if: github.event_name == 'schedule'
+        run: |
+          # Get the base image from the recipe
+          BASE_IMAGE=$(grep -E "^base-image:" recipes/${{ matrix.recipe }} | cut -d' ' -f2 | tr -d '"')
+          echo "Base image: $BASE_IMAGE"
+          
+          # Get current digest of base image
+          CURRENT_DIGEST=$(skopeo inspect docker://$BASE_IMAGE | jq -r '.Digest')
+          echo "Current digest: $CURRENT_DIGEST"
+          
+          # Get the last successful build's digest from GitHub API
+          echo "Checking last successful build..."
+          LAST_DIGEST=""
+          
+          # Get the last successful workflow run for this recipe
+          LAST_RUN=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=success&event=schedule&per_page=1" | \
+            jq -r '.workflow_runs[0].id // empty')
+          
+          if [ -n "$LAST_RUN" ]; then
+            echo "Found last successful run: $LAST_RUN"
+            
+            # Get the logs from the last run to extract the digest
+            LOGS_URL=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs/$LAST_RUN/logs")
+            
+            # Try to extract the digest from logs
+            LAST_DIGEST=$(echo "$LOGS_URL" | grep -o "Current digest: sha256:[a-f0-9]\{64\}" | head -1 | cut -d' ' -f3 || echo "")
+          fi
+          
+          echo "Last digest: ${LAST_DIGEST:-'none found'}"
+          echo "Current digest: $CURRENT_DIGEST"
+          
+          # Compare digests
+          if [ "$CURRENT_DIGEST" != "$LAST_DIGEST" ] || [ -z "$LAST_DIGEST" ]; then
+            echo "Image has changed or no previous digest found - building"
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "Image unchanged - skipping build"
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "current_digest=$CURRENT_DIGEST" >> $GITHUB_OUTPUT
+      
       - name: Place the EVDI signing key
+        if: steps.check_image.outputs.should_build == 'true' || github.event_name != 'schedule'
         run: echo "${{ secrets.EVDI_SIGNING_KEY_PEM }}" > files/keys/evdi-signing-key.pem
       - name: Build Custom Image
+        if: steps.check_image.outputs.should_build == 'true' || github.event_name != 'schedule'
         uses: blue-build/github-action@v1.8
         with:
           recipe: ${{ matrix.recipe }}
