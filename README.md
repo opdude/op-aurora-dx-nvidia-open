@@ -83,6 +83,26 @@ evdi-<kernel-version>-<arch>.ko
 
 For example: `evdi-6.11.0-68.fc40.x86_64-x86_64.ko`
 
+#### Building Prebuilt Modules
+
+First, we need to switch to the latest bazzite-dx-nvidia-open image to get the latest kernel headers:
+
+```
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/bazzite-dx-nvidia-open:stable
+```
+
+Then, build the prebuilt modules using the provided script:
+
+```bash
+./scripts/build-evdi-docker.sh
+```
+
+Add the package to the `files/prebuilt-modules/` directory, and then build the image with the following command to check it works:
+
+```bash
+bluebuild build recipes/recipe.yml
+```
+
 ## Contributing
 
 See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for more information about customizing and contributing to this image.
