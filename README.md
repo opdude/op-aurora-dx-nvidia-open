@@ -1,6 +1,6 @@
-# op-bazzite-dx-nvidia-open &nbsp; [![bluebuild build badge](https://github.com/opdude/op-bazzite-dx-nvidia-open/actions/workflows/build.yml/badge.svg)](https://github.com/opdude/op-bazzite-dx-nvidia-open/actions/workflows/build.yml)
+# op-aurora-dx-nvidia-open &nbsp; [![bluebuild build badge](https://github.com/opdude/op-aurora-dx-nvidia-open/actions/workflows/build.yml/badge.svg)](https://github.com/opdude/op-aurora-dx-nvidia-open/actions/workflows/build.yml)
 
-A custom Bazzite DX image with DisplayLink EVDI support for enhanced multi-monitor setups.
+A custom Aurora DX image with DisplayLink EVDI support for enhanced multi-monitor setups.
 
 ## Features
 
@@ -18,7 +18,7 @@ To rebase an existing atomic Fedora installation to the latest build:
 
 - First rebase to the unsigned image, to get the proper signing keys and policies installed:
   ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/op-bazzite-dx-nvidia-open:latest
+  rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/op-aurora-dx-nvidia-open:latest
   ```
 
 ### Using Stable Tag
@@ -26,7 +26,7 @@ For production use, you can use the stable tag which is updated when changes are
 
 - Rebase to the stable image:
   ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/op-bazzite-dx-nvidia-open:stable
+  rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/op-aurora-dx-nvidia-open:stable
   ```
 
 - Reboot to complete the rebase:
@@ -35,11 +35,11 @@ For production use, you can use the stable tag which is updated when changes are
   ```
 - Then rebase to the signed image, like so:
   ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/opdude/op-bazzite-dx-nvidia-open:latest
+  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/opdude/op-aurora-dx-nvidia-open:latest
   ```
   or for the stable tag:
   ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/opdude/op-bazzite-dx-nvidia-open:stable
+  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/opdude/op-aurora-dx-nvidia-open:stable
   ```
 - Reboot again to complete the installation
   ```
@@ -85,10 +85,10 @@ For example: `evdi-6.11.0-68.fc40.x86_64-x86_64.ko`
 
 #### Building Prebuilt Modules
 
-First, we need to switch to the latest bazzite-dx-nvidia-open image to get the latest kernel headers:
+First, we need to switch to the latest aurora-dx-nvidia-open image to get the latest kernel headers:
 
 ```
-rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/bazzite-dx-nvidia-open:stable
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/aurora-dx-nvidia-open:stable
 ```
 
 Then, build the prebuilt modules using the provided script:
@@ -119,5 +119,5 @@ If build on Fedora Atomic, you can generate an offline ISO with the instructions
 These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign). You can verify the signature by downloading the `cosign.pub` file from this repo and running the following command:
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/opdude/op-bazzite-dx-nvidia-open
+cosign verify --key cosign.pub ghcr.io/opdude/op-aurora-dx-nvidia-open
 ```

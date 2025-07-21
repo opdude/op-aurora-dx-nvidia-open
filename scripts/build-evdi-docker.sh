@@ -1,11 +1,17 @@
 #!/bin/bash
-
-# Script to build EVDI module using Docker with the target Bazzite base image
+# Usage: ./build-evdi-docker.sh <base_image>
+# Script to build EVDI module using Docker with the target Bazzite/Aurora base image
 set -euo pipefail
 
-echo "Building EVDI module using Docker with Bazzite base image..."
+# Check if base image is provided
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 <base_image> (e.g., ghcr.io/ublue-os/aurora-dx-nvidia-open:stable)"
+    exit 1
+fi
+BASE_IMAGE="$1"
 
-BASE_IMAGE="ghcr.io/ublue-os/bazzite-dx-nvidia-open:stable-42"
+echo "Building EVDI module using Docker with $BASE_IMAGE base image..."
+
 OUTPUT_DIR="./files/prebuilt-modules"
 BUILD_SCRIPT="build-evdi-docker.sh"
 
