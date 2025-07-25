@@ -63,42 +63,9 @@ To do this, run the following command:
 
 ```bash
 sudo mokutil --import /etc/pki/DisplayLink/evdi-signing-key.der
-```bash
-sudo mokutil --import /etc/pki/DisplayLink/evdi-signing-key.der
 ```
 
 You will be prompted to set a password for MOK enrollment. After setting the password, reboot the system. During boot, you will see the MOK Manager screen. Select "Enroll MOK" and follow the prompts. Enter the password you set earlier to enroll the key. After this, the evdi module should load correctly.
-
-### Using the Signed Image
-
-Once you have an unsigned image, you can switch to a signed image if you prefer.
-
-**For KDE Plasma (default Bazzite):**
-```bash
-rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-evdi:stable
-```
-
-**For GNOME:**
-```bash
-rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-gnome-evdi:stable
-```
-
-### NVIDIA Variants
-
-**For Bazzite KDE Plasma with NVIDIA:**
-```bash
-rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-nvidia-open-evdi:stable
-```
-
-**For GNOME:**
-```bash
-rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-gnome-nvidia-open-evdi:stable
-```
-
-**For Aurora DX KDE Plasma with NVIDIA:**
-```bash
-rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/aurora-dx-nvidia-open-evdi:stable
-```
 
 ## Development
 
