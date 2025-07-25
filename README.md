@@ -57,7 +57,7 @@ After running the rebase command, reboot your system to complete the installatio
 > [!NOTE]  
 > If you are using secureboot, this step is essential to ensure the EVDI module loads correctly.
 
-After the first boot, whether using a signed or unsigned image, if you have secureboot enabled, you will need to enroll the DisplayLink EVDI module signing key. This is necessary for the evdi module to load correctly.
+After the first boot, if you have secureboot enabled, you will need to enroll the DisplayLink EVDI module signing key. This is necessary for the evdi module to load correctly.
 
 To do this, run the following command:
 
