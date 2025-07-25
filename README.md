@@ -1,6 +1,6 @@
-# op-aurora-dx-nvidia-open &nbsp; [![bluebuild build badge](https://github.com/opdude/op-aurora-dx-nvidia-open/actions/workflows/build.yml/badge.svg)](https://github.com/opdude/op-aurora-dx-nvidia-open/actions/workflows/build.yml)
+# blue-build-evdi-images &nbsp; [![bluebuild build badge](https://github.com/opdude/blue-build-evdi-images/actions/workflows/build.yml/badge.svg)](https://github.com/opdude/blue-build-evdi-images/actions/workflows/build.yml)
 
-A custom Aurora DX image with DisplayLink EVDI support for enhanced multi-monitor setups.
+Adds DisplayLink EVDI support for enhanced multi-monitor setups to the Bazzite and Aurora DX images.
 
 ## Features
 
@@ -11,54 +11,94 @@ A custom Aurora DX image with DisplayLink EVDI support for enhanced multi-monito
 ## Installation
 
 > [!WARNING]  
-> [This is an experimental feature](https://www.fedoraproject.org/wiki/Changes/OstreeNativeContainerStable), try at your own discretion.
+> These are experimental images, try at your own discretion.
 
-### Using Latest Build
-To rebase an existing atomic Fedora installation to the latest build:
+To rebase an existing Bazzite installation to the EVDI images use one of the following commands based on your current variant:
 
-- First rebase to the unsigned image, to get the proper signing keys and policies installed:
-  ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/op-aurora-dx-nvidia-open:latest
-  ```
+**For KDE Plasma (default Bazzite):**
+```bash
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-evdi:stable
+```
 
-### Using Stable Tag
-For production use, you can use the stable tag which is updated when changes are pushed to the main branch:
+**For GNOME:**
+```bash
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-gnome-evdi:stable
+```
 
-- Rebase to the stable image:
-  ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/op-aurora-dx-nvidia-open:stable
-  ```
+### NVIDIA Variants
 
-- Reboot to complete the rebase:
-  ```
-  systemctl reboot
-  ```
-- Then rebase to the signed image, like so:
-  ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/opdude/op-aurora-dx-nvidia-open:latest
-  ```
-  or for the stable tag:
-  ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/opdude/op-aurora-dx-nvidia-open:stable
-  ```
-- Reboot again to complete the installation
-  ```
-  systemctl reboot
-  ```
+**For Bazzite KDE Plasma with NVIDIA:**
+```bash
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-nvidia-open-evdi:stable
+```
 
-## DisplayLink Setup
+**For GNOME:**
+```bash
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-gnome-nvidia-open-evdi:stable
+```
+
+**For Aurora DX KDE Plasma with NVIDIA:**
+```bash
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/aurora-dx-nvidia-open-evdi:stable
+```
+
+### ⚠️ Important Desktop Environment Warning
+
+**Do not switch between GNOME and KDE variants!** If you are currently running:
+- **GNOME** (bazzite-gnome*): Only use the `-gnome` variants above
+- **KDE Plasma** (standard bazzite): Only use the variants without `-gnome` in the name
+
+Switching between desktop environments via rebase can break your installation and may require a complete reinstall.
+
+After running the rebase command, reboot your system to complete the installation. 
 
 ### Secureboot
 
-After the first boot, if you have secureboot enabled, you will need to enroll the DisplayLink EVDI module signing key. This is necessary for the evdi module to load correctly.
+> [!NOTE]  
+> If you are using secureboot, this step is essential to ensure the EVDI module loads correctly.
+
+After the first boot, whether using a signed or unsigned image, if you have secureboot enabled, you will need to enroll the DisplayLink EVDI module signing key. This is necessary for the evdi module to load correctly.
 
 To do this, run the following command:
 
 ```bash
 sudo mokutil --import /etc/pki/DisplayLink/evdi-signing-key.der
+```bash
+sudo mokutil --import /etc/pki/DisplayLink/evdi-signing-key.der
 ```
 
 You will be prompted to set a password for MOK enrollment. After setting the password, reboot the system. During boot, you will see the MOK Manager screen. Select "Enroll MOK" and follow the prompts. Enter the password you set earlier to enroll the key. After this, the evdi module should load correctly.
+
+### Using the Signed Image
+
+Once you have an unsigned image, you can switch to a signed image if you prefer.
+
+**For KDE Plasma (default Bazzite):**
+```bash
+rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-evdi:stable
+```
+
+**For GNOME:**
+```bash
+rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-gnome-evdi:stable
+```
+
+### NVIDIA Variants
+
+**For Bazzite KDE Plasma with NVIDIA:**
+```bash
+rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-nvidia-open-evdi:stable
+```
+
+**For GNOME:**
+```bash
+rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/bazzite-gnome-nvidia-open-evdi:stable
+```
+
+**For Aurora DX KDE Plasma with NVIDIA:**
+```bash
+rpm-ostree rebase ostree-image-signed:ghcr.io/opdude/aurora-dx-nvidia-open-evdi:stable
+```
 
 ## Development
 
@@ -90,7 +130,7 @@ For example: `evdi-6.11.0-68.fc40.x86_64-x86_64.ko`
 First, we need to switch to the latest aurora-dx-nvidia-open image to get the latest kernel headers:
 
 ```
-rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/aurora-dx-nvidia-open:stable
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/aurora-dx-nvidia-open:stable
 ```
 
 Then, build the prebuilt modules using the provided script:
