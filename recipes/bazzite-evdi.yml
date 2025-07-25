@@ -1,13 +1,12 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 # image will be published to ghcr.io/<user>/<name>
-name: op-bazzite-dx-nvidia-open
-# description will be included in the image's metadata
-description: This is my personal OS image.
+name: bazzite-evdi
+description: bazzite with DisplayLink EVDI support
 
 # the base image to build on top of (FROM) and the version tag to use
-base-image: ghcr.io/ublue-os/bazzite-dx-nvidia-open
-image-version: stable-42
+base-image: ghcr.io/ublue-os/bazzite
+image-version: stable
 
 # module configuration, executed in order
 # you can include multiple instances of the same module
@@ -20,10 +19,6 @@ modules:
         destination: /tmp/rpms # copies files/rpms/* into /tmp/rpms/ in the image
       - source: prebuilt-modules
         destination: /tmp/prebuilt-modules # copies files/prebuilt-modules/* into /tmp/prebuilt-modules/ in the image
-
-  # Install netbird
-  - type: netbird
-    source: local         
 
   # Custom DisplayLink EVDI installation script
   - type: displaylink
