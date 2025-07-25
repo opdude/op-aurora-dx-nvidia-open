@@ -32,7 +32,7 @@ rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-gnome-evdi:s
 rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-nvidia-open-evdi:stable
 ```
 
-**For GNOME:**
+**For GNOME with NVIDIA:**
 ```bash
 rpm-ostree rebase ostree-unverified-registry:ghcr.io/opdude/bazzite-gnome-nvidia-open-evdi:stable
 ```
