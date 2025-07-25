@@ -20,10 +20,6 @@ modules:
       - source: prebuilt-modules
         destination: /tmp/prebuilt-modules # copies files/prebuilt-modules/* into /tmp/prebuilt-modules/ in the image
 
-  # Install netbird
-  - type: netbird
-    source: local         
-
   # Custom DisplayLink EVDI installation script
   - type: displaylink
     source: local
