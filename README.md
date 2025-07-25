@@ -76,6 +76,8 @@ bluebuild build recipes/recipe.yml
 
 ### Prebuilt Modules
 
+Note: The following is only needed for local development as the github actions will automatically build the prebuilt modules.
+
 The image supports prebuilt EVDI modules. Place them in `files/prebuilt-modules/` with the naming convention:
 ```
 evdi-<kernel-version>-<arch>.ko
