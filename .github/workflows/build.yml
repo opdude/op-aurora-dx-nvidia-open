@@ -57,16 +57,26 @@ jobs:
           LAST_DIGEST=""
           
           # Get the last successful workflow run for this recipe
-          LAST_RUN=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+          LAST_JOB=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=success&event=schedule&per_page=1" | \
-            jq -r '.workflow_runs[0].id // empty')
+            jq -r '.workflow_runs[0].jobs_url // empty')
+
+          if [ -z "$LAST_JOB" ]; then
+            echo "No previous successful runs found."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          fi else
+            echo "Last successful job URL: $LAST_JOB"
+          fi
+
+          LAST_RUN=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+            "$LAST_JOB" | jq -r '.jobs[] | select(.name | test("${{ matrix.recipe }}")) | .url' | head -n 1')
           
           if [ -n "$LAST_RUN" ]; then
             echo "Found last successful run: $LAST_RUN"
             
             # Get the logs from the last run to extract the digest
-            LOGS_URL=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/runs/$LAST_RUN/logs")
+            LOGS_URL=$(curl -L -s -H "Authorization: Bearer ${{ github.token }}" \
+              "$LAST_RUN/logs")
             
             # Try to extract the digest from logs
             LAST_DIGEST=$(echo "$LOGS_URL" | grep -o "Current digest: sha256:[a-f0-9]\{64\}" | head -1 | cut -d' ' -f3 || echo "")
