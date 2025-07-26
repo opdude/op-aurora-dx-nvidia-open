@@ -2,7 +2,8 @@ name: bluebuild
 on:
   schedule:
     - cron:
-        "00 06 * * *" # build at 06:00 UTC every day
+        "30 * * * *" # every hour at 30 minutes past the hour (testing)
+        #"00 06 * * *" # build at 06:00 UTC every day
         # (20 minutes after last ublue images start building)
   push:
     branches: [ main ]
@@ -47,7 +48,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y skopeo
       
-      - name: Check for new Aurora DX image
+      - name: Check for last digest
         id: check_image
         if: github.event_name == 'schedule'
         run: |
@@ -57,10 +58,6 @@ jobs:
           # Add the image-version
           BASE_IMAGE="${BASE_IMAGE}:$(grep -E "^image-version:" recipes/${{ matrix.recipe }} | cut -d' ' -f2 | tr -d '"')"
           echo "Base image: $BASE_IMAGE"
-          
-          # Get current digest of base image
-          CURRENT_DIGEST=$(skopeo inspect docker://$BASE_IMAGE | jq -r '.Digest')
-          echo "Current digest: $CURRENT_DIGEST"
           
           # Get the last successful build's digest from GitHub API
           echo "Checking last successful build..."
@@ -91,6 +88,10 @@ jobs:
             # Try to extract the digest from logs
             LAST_DIGEST=$(echo "$LOGS_URL" | grep -o "Current digest: sha256:[a-f0-9]\{64\}" | head -1 | cut -d' ' -f3 || echo "")
           fi
+
+          # Get current digest of base image
+          CURRENT_DIGEST=$(skopeo inspect docker://$BASE_IMAGE | jq -r '.Digest')
+          echo "Current digest: $CURRENT_DIGEST"          
           
           echo "Last digest: ${LAST_DIGEST:-'none found'}"
           echo "Current digest: $CURRENT_DIGEST"
