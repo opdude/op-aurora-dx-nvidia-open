@@ -91,7 +91,6 @@ jobs:
 
           # Get current digest of base image
           CURRENT_DIGEST=$(skopeo inspect docker://$BASE_IMAGE | jq -r '.Digest')
-          echo "Current digest: $CURRENT_DIGEST"          
           
           echo "Last digest: ${LAST_DIGEST:-'none found'}"
           echo "Current digest: $CURRENT_DIGEST"
