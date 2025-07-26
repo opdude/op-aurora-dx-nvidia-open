@@ -2,8 +2,7 @@ name: bluebuild
 on:
   schedule:
     - cron:
-        "30 * * * *" # every hour at 30 minutes past the hour (testing)
-        #"00 06 * * *" # build at 06:00 UTC every day
+        "00 06 * * *" # build at 06:00 UTC every day
         # (20 minutes after last ublue images start building)
   push:
     branches: [ main ]
@@ -43,7 +42,6 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Install skopeo for image checking
-        if: github.event_name == 'schedule'
         run: |
           sudo apt-get update
           sudo apt-get install -y skopeo
@@ -142,13 +140,6 @@ jobs:
           use_cache: true # use the cache to speed up builds
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
-
-      # Create stable tag when pushed to main branch
-      - name: Install skopeo
-        if: github.ref == 'refs/heads/main' && steps.check_image.outputs.should_build == 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y skopeo
           
       - name: Create stable tag
         if: github.ref == 'refs/heads/main' && steps.check_image.outputs.should_build == 'true'
