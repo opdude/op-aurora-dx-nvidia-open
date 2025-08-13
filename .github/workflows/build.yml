@@ -32,10 +32,10 @@ jobs:
       matrix:
         recipe:
           - aurora-dx-nvidia-open-evdi.yml
-          - bazzite-evdi.yml
-          - bazzite-gnome-evdi.yml
-          - bazzite-gnome-nvidia-open-evdi.yml
-          - bazzite-nvidia-open-evdi.yml
+          # - bazzite-evdi.yml
+          # - bazzite-gnome-evdi.yml
+          # - bazzite-gnome-nvidia-open-evdi.yml
+          # - bazzite-nvidia-open-evdi.yml
     steps:
       # the build is fully handled by the reusable github action
       - name: Checkout code
