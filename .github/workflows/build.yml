@@ -42,12 +42,11 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Install skopeo for image checking
-        if: github.event_name == 'schedule'
         run: |
           sudo apt-get update
           sudo apt-get install -y skopeo
       
-      - name: Check for new Aurora DX image
+      - name: Check for last digest
         id: check_image
         if: github.event_name == 'schedule'
         run: |
@@ -57,10 +56,6 @@ jobs:
           # Add the image-version
           BASE_IMAGE="${BASE_IMAGE}:$(grep -E "^image-version:" recipes/${{ matrix.recipe }} | cut -d' ' -f2 | tr -d '"')"
           echo "Base image: $BASE_IMAGE"
-          
-          # Get current digest of base image
-          CURRENT_DIGEST=$(skopeo inspect docker://$BASE_IMAGE | jq -r '.Digest')
-          echo "Current digest: $CURRENT_DIGEST"
           
           # Get the last successful build's digest from GitHub API
           echo "Checking last successful build..."
@@ -91,6 +86,9 @@ jobs:
             # Try to extract the digest from logs
             LAST_DIGEST=$(echo "$LOGS_URL" | grep -o "Current digest: sha256:[a-f0-9]\{64\}" | head -1 | cut -d' ' -f3 || echo "")
           fi
+
+          # Get current digest of base image
+          CURRENT_DIGEST=$(skopeo inspect docker://$BASE_IMAGE | jq -r '.Digest')
           
           echo "Last digest: ${LAST_DIGEST:-'none found'}"
           echo "Current digest: $CURRENT_DIGEST"
@@ -111,6 +109,7 @@ jobs:
         uses: docker/setup-buildx-action@v3  
         
       - name: Build EVDI module
+        if: steps.check_image.outputs.should_build == 'true' || github.event_name != 'schedule'
         run: |
           # Get the base image from the recipe
           BASE_IMAGE=$(grep -E "^base-image:" recipes/${{ matrix.recipe }} | cut -d' ' -f2 | tr -d '"')
@@ -141,16 +140,9 @@ jobs:
           use_cache: true # use the cache to speed up builds
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
-
-      # Create stable tag when pushed to main branch
-      - name: Install skopeo
-        if: github.ref == 'refs/heads/main'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y skopeo
           
       - name: Create stable tag
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && steps.check_image.outputs.should_build == 'true'
         run: |
           # Get the built image name from the recipe
           IMAGE_NAME=$(grep -E "^name:" recipes/${{ matrix.recipe }} | cut -d' ' -f2 | tr -d '"')
